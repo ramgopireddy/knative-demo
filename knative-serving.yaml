@@ -1,0 +1,14 @@
+apiVersion: operator.knative.dev/v1alpha1
+kind: KnativeServing
+metadata:
+  name: knative-serving
+  # Always install in this namespace
+  namespace: knative-serving
+spec:
+  config:
+    autoscaler:
+      # Enable or disable scale-to-zero globally for applications on the cluster
+      enable-scale-to-zero: "true"
+
+      # define an upper bound time limit that Knative waits for scale-to-zero machinery to be in place before the last replica of an application is removed.
+      scale-to-zero-grace-period: "30s"
