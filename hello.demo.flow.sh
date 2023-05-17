@@ -53,7 +53,7 @@ hey -c 50 -z 20s $URL
 kn revision list
 
 # Traffic Switching
-kn service update hello-knative --traffic version01=1 --traffic version01=99
+#Example: kn service update hello-knative --traffic version01=1 --traffic version01=99
 kn service update hello-knative --traffic hello-knative-00002=1 --traffic hello-knative-00001=99
 
 # Send traffic and show the increase in pod count
@@ -75,17 +75,19 @@ hey -c 50 -z 10s $URL
 # Pod comes up online and starts serving the request
 # Pod also comes with another container that sends metrics to the activator
 # Activator decides if more pods are needed based on concurrency
-# Activator informs the k8s
-# Pods are scaled accordingly,. This continues to happen based on the set max scale
-
+# Activator informs k8s
+# Pods are scaled accordingly. This continues to happen based on the set max scale
 
 
 Eventing:
 
 #Create a new project for kafka cluster
 oc new-project amq-streams
+
 #create the cluster
 oc create -n amq-streams -f kafka-cluster.yaml
+
+oc create -n knative-eventing -f knativeKafka.yaml
 
 #Create a new project for the demo
 oc new-project eventing-demo
@@ -132,5 +134,16 @@ kn service create event-display4 \
     --scale-window=10s
 
 # apply filters:
-type: rccl.ship.to.shore.event
+type: test.event
 type: dev.knative.kafka.event
+
+#podman machine start
+
+#knative functions
+kn func create nodejs -l node -t cloudevents
+
+#alternatively use kn func create -c
+
+kn func deploy -v
+
+kn func invoke --data "Hello BK"
