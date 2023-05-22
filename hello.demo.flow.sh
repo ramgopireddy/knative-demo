@@ -98,7 +98,7 @@ kn service create event-display1 \
 
 kn source ping create test-ping-source \
     --schedule "*/1 * * * *" \
-    --data '{"message": "Welcome to RCCL!"}' \
+    --data '{"message": "Welcome to BK!"}' \
     --sink ksvc:event-display1
 
 #create an in-mem channel from the ui and link to the source and svcs
