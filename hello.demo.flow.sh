@@ -78,72 +78,84 @@ hey -c 50 -z 10s $URL
 # Activator informs k8s
 # Pods are scaled accordingly. This continues to happen based on the set max scale
 
+##########
 
-Eventing:
+# Eventing:
 
-#Create a new project for kafka cluster
+# Create a new project for kafka cluster
 oc new-project amq-streams
 
-#create the cluster
+# Create the cluster
 oc create -n amq-streams -f kafka-cluster.yaml
 
+# Create the KnativeEventing instance
+oc create -n knative-eventing -f knative-eventing.yaml
+
+# Create the KnativeKafka instance
 oc create -n knative-eventing -f knativeKafka.yaml
 
-#Create a new project for the demo
+# Create a new project for the demo
 oc new-project eventing-demo
 
+# TODO: Label what this does for workshop / demo
 kn service create event-display1 \
     --image quay.io/openshift-knative/knative-eventing-sources-event-display:latest \
     --scale-window 10s
 
+# Ping source for event-display1 service above
 kn source ping create test-ping-source \
     --schedule "*/1 * * * *" \
-    --data '{"message": "Welcome to BK!"}' \
+    --data '{"message": "Welcome to Serverless!"}' \
     --sink ksvc:event-display1
 
-#create an in-mem channel from the ui and link to the source and svcs
+# Create an in-mem channel from the ui and link to the source and svcs
 
-#add a new kn service and link with the same event
+# Add a new kn service and link with the same event
 kn service create event-display2 \
     --image quay.io/openshift-knative/knative-eventing-sources-event-display:latest \
     --scale-window=10s
 
-#create a channel for subscription from the ui
+# Create a channel for subscription from the ui
 kn channel list
 
-#list subscriptions
+# List subscriptions
 kn subscription list
 
+# Create new event sink for Kafka source below
 kn service create event-display3 \
     --image quay.io/openshift-knative/knative-eventing-sources-event-display:latest \
     --scale-window=10s
 
-#create kafka source from yaml
+# Create kafka source from yaml
 oc create -f kafkasource.yaml
 
-# generate messages to the demo kafka topic (data source)
+# Generate messages to the demo kafka topic (data source)
 oc -n eventing-demo run kafka-producer \
     -ti --image=quay.io/strimzi/kafka:latest-kafka-2.7.0 --rm=true \
     --restart=Never -- bin/kafka-console-producer.sh \
     --broker-list my-cluster-kafka-bootstrap.amq-streams.svc.cluster.local:9092 \
     --topic knative-demo-topic
 
-# create a broker from the UI
+# Create a broker from the UI and attach display3 and display4 to it
 kn service create event-display4 \
     --image quay.io/openshift-knative/knative-eventing-sources-event-display:latest \
     --scale-window=10s
 
-# apply filters:
+# Apply filters to filter messages between display3 and display4:
 type: test.event
 type: dev.knative.kafka.event
 
-#podman machine start
+##########
 
-#knative functions
+# Functions:
+
+# Podman machine start
+
+# Knative functions
 kn func create nodejs -l node -t cloudevents
 
-#alternatively use kn func create -c
+# Alternatively use kn func create -c
 
 kn func deploy -v
 
-kn func invoke --data "Hello BK"
+kn func invoke --data "Hello Serverless!"
