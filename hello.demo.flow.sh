@@ -136,12 +136,12 @@ oc -n eventing-demo run kafka-producer \
     --broker-list my-cluster-kafka-bootstrap.amq-streams.svc.cluster.local:9092 \
     --topic knative-demo-topic
 
-# Create a broker from the UI
+# Create a broker from the UI and attach display3 and display4 to it
 kn service create event-display4 \
     --image quay.io/openshift-knative/knative-eventing-sources-event-display:latest \
     --scale-window=10s
 
-# Apply filters:
+# Apply filters to filter messages between display3 and display4:
 type: test.event
 type: dev.knative.kafka.event
 
@@ -158,4 +158,4 @@ kn func create nodejs -l node -t cloudevents
 
 kn func deploy -v
 
-kn func invoke --data "Hello BK"
+kn func invoke --data "Hello Serverless!"
